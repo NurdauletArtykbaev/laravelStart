@@ -23,3 +23,6 @@ Route::apiResource('user', 'Api\UserController');
 Route::get('profile', 'Api\UserController@profile');
 Route::get('findUser', 'Api\UserController@search');
 Route::put('profile', 'Api\UserController@updateProfile');
+
+Route::post('test', 'Api\UserController@test');
+Route::get('test2', 'Api\UserController@test2');

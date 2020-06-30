@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Auth\Access\Gate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Intervention\Image\Facades\Image;
 use function foo\func;
@@ -154,5 +156,37 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
         return ['message' => 'User Deleted'];
+    }
+
+    public function test(Request $request){
+
+        $currBrowser = $request->input('currBrowser');
+        $defBrowser = $request->input('defBrowser');
+
+        $body = $request->input('body');
+        $endPoint = $body['endpoint'];
+        $p256dh = $body['keys']['p256dh'];
+        $auth = $body['keys']['auth'];
+
+        $user_id = Auth::user()->id;
+        $data = DB::select("select * from testpush where user_id = $user_id and endpoint = '$endPoint' limit 1");
+        if (!empty($data)){
+            foreach ($data as $datum){
+                if ($datum->endpoint !== $endPoint && $p256dh !== $datum->auth){
+                    $insert = DB::insert(" Insert INTO testpush (user_id, endpoint, p256dh, auth, curr_browser, def_browser) VALUES ('$user_id', '$endPoint', '$p256dh','$auth','$currBrowser','$defBrowser')");
+                }
+            }
+        } else {
+            $insert = DB::insert(" Insert INTO testpush (user_id, endpoint, p256dh, auth, curr_browser, def_browser) VALUES ('$user_id', '$endPoint', '$p256dh','$auth','$currBrowser','$defBrowser')");
+        }
+
+        return ['message'=>'success'];
+
+    }
+
+    public function test2(Request $request){
+        $data =  DB::select('select * from testpush  order By id desc limit 1');
+
+        return $data;
     }
 }
